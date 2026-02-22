@@ -119,15 +119,18 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
       riskAmount: values.riskAmount || null,
       rewardAmount: values.rewardAmount || null,
       notes: values.notes || null,
+      tickSize: values.tickSize || "0.25",
+      tickValue: values.tickValue || "12.50",
+      commissions: values.commissions || "0",
     };
 
     if (isEditing && trade) {
       updateMutation.mutate(
-        { id: trade.id, data },
+        { id: trade.id, data: data as any },
         { onSuccess: () => onOpenChange(false) }
       );
     } else {
-      createMutation.mutate(data, { onSuccess: () => onOpenChange(false) });
+      createMutation.mutate(data as any, { onSuccess: () => onOpenChange(false) });
     }
   };
 
