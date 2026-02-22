@@ -106,13 +106,13 @@ export default function Trades() {
           <Table>
             <TableHeader className="bg-background/80 sticky top-0 z-10 backdrop-blur-md">
               <TableRow className="border-border/50 hover:bg-transparent">
-                <TableHead className="w-[100px]">Ticker</TableHead>
+                <TableHead>Ticker</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Entry Date</TableHead>
-                <TableHead className="text-right">Entry Price</TableHead>
-                <TableHead className="text-right">Exit Price</TableHead>
-                <TableHead className="text-right">P&L</TableHead>
+                <TableHead className="text-right">Qty</TableHead>
+                <TableHead className="text-right">Gross P&L</TableHead>
+                <TableHead className="text-right">Fees</TableHead>
+                <TableHead className="text-right font-bold">Net P&L</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -133,9 +133,11 @@ export default function Trades() {
                 </TableRow>
               ) : (
                 filteredTrades.map((trade) => {
-                  const pnl = trade.pnl ? parseFloat(trade.pnl as string) : null;
-                  const isWin = pnl !== null && pnl > 0;
-                  const isLoss = pnl !== null && pnl < 0;
+                  const pnl = trade.pnl ? parseFloat(trade.pnl as string) : 0;
+                  const commissions = trade.commissions ? parseFloat(trade.commissions as string) : 0;
+                  const netPnl = pnl - commissions;
+                  const isWin = netPnl > 0;
+                  const isLoss = netPnl < 0;
                   
                   return (
                     <TableRow key={trade.id} className="border-border/50 hover:bg-white/5 transition-colors group">
@@ -155,17 +157,17 @@ export default function Trades() {
                           {trade.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-numbers text-muted-foreground">
-                        {formatShortDate(trade.entryDate)}
+                      <TableCell className="text-right font-numbers">
+                        {trade.positionSize}
                       </TableCell>
                       <TableCell className="text-right font-numbers">
-                        {formatCurrency(trade.entryPrice)}
+                        {formatCurrency(pnl)}
                       </TableCell>
                       <TableCell className="text-right font-numbers text-muted-foreground">
-                        {trade.exitPrice ? formatCurrency(trade.exitPrice) : '—'}
+                        {formatCurrency(commissions)}
                       </TableCell>
                       <TableCell className={`text-right font-numbers font-bold ${isWin ? 'text-success text-glow-success' : isLoss ? 'text-destructive text-glow-danger' : 'text-muted-foreground'}`}>
-                        {pnl !== null ? formatCurrency(pnl) : '—'}
+                        {formatCurrency(netPnl)}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>

@@ -65,20 +65,23 @@ export class DatabaseStorage implements IStorage {
 
     for (const t of sortedClosedTrades) {
       const pnl = Number(t.pnl || 0);
-      if (pnl > 0) wins++;
-      else if (pnl < 0) losses++;
+      const commissions = Number(t.commissions || 0);
+      const netPnl = pnl - commissions;
+
+      if (netPnl > 0) wins++;
+      else if (netPnl < 0) losses++;
       
-      totalPnl += pnl;
+      totalPnl += netPnl;
       
-      currentCumulative += pnl;
+      currentCumulative += netPnl;
       performanceCurve.push({
         date: (t.exitDate || t.entryDate).toISOString(),
         cumulativePnl: currentCumulative
       });
 
       const risk = Number(t.riskAmount || 0);
-      const reward = Number(t.rewardAmount || Math.abs(pnl));
-      if (risk > 0 && pnl > 0) {
+      const reward = Number(t.rewardAmount || Math.abs(netPnl));
+      if (risk > 0 && netPnl > 0) {
         riskRewardSum += reward / risk;
         riskRewardCount++;
       }

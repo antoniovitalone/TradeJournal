@@ -33,6 +33,9 @@ export async function registerRoutes(
         rewardAmount: z.coerce.string().optional().nullable(),
         entryDate: z.coerce.date().optional(),
         exitDate: z.coerce.date().optional().nullable(),
+        tickSize: z.coerce.string().optional(),
+        tickValue: z.coerce.string().optional(),
+        commissions: z.coerce.string().optional(),
       });
       const input = bodySchema.parse(req.body);
       const trade = await storage.createTrade(input as any);
@@ -59,6 +62,9 @@ export async function registerRoutes(
         rewardAmount: z.coerce.string().optional().nullable(),
         entryDate: z.coerce.date().optional(),
         exitDate: z.coerce.date().optional().nullable(),
+        tickSize: z.coerce.string().optional(),
+        tickValue: z.coerce.string().optional(),
+        commissions: z.coerce.string().optional(),
       });
       const input = bodySchema.parse(req.body);
       const trade = await storage.updateTrade(Number(req.params.id), input as any);

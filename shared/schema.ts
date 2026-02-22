@@ -9,13 +9,16 @@ export const trades = pgTable("trades", {
   exitDate: timestamp("exit_date"),
   entryPrice: numeric("entry_price").notNull(),
   exitPrice: numeric("exit_price"),
-  positionSize: numeric("position_size").notNull(),
+  positionSize: numeric("position_size").notNull(), // Number of contracts
   direction: text("direction").notNull(), // 'long' or 'short'
   pnl: numeric("pnl"),
   notes: text("notes"),
   riskAmount: numeric("risk_amount"),
   rewardAmount: numeric("reward_amount"),
   status: text("status").notNull().default('open'), // 'open' or 'closed'
+  tickSize: numeric("tick_size").notNull().default('0.25'),
+  tickValue: numeric("tick_value").notNull().default('12.50'),
+  commissions: numeric("commissions").default('0'),
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({ 

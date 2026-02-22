@@ -20,11 +20,14 @@ const formSchema = z.object({
   exitDate: z.string().optional().nullable(),
   entryPrice: z.coerce.string().min(1, "Entry price is required"),
   exitPrice: z.coerce.string().optional().nullable(),
-  positionSize: z.coerce.string().min(1, "Size is required"),
+  positionSize: z.coerce.string().min(1, "Contracts is required"),
   pnl: z.coerce.string().optional().nullable(),
   riskAmount: z.coerce.string().optional().nullable(),
   rewardAmount: z.coerce.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  tickSize: z.coerce.string().default("0.25"),
+  tickValue: z.coerce.string().default("12.50"),
+  commissions: z.coerce.string().default("0"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,6 +59,9 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
       riskAmount: "",
       rewardAmount: "",
       notes: "",
+      tickSize: "0.25",
+      tickValue: "12.50",
+      commissions: "0",
     },
   });
 
@@ -76,6 +82,9 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
           riskAmount: trade.riskAmount?.toString() || "",
           rewardAmount: trade.rewardAmount?.toString() || "",
           notes: trade.notes || "",
+          tickSize: trade.tickSize?.toString() || "0.25",
+          tickValue: trade.tickValue?.toString() || "12.50",
+          commissions: trade.commissions?.toString() || "0",
         });
       } else {
         form.reset({
@@ -91,6 +100,9 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
           riskAmount: "",
           rewardAmount: "",
           notes: "",
+          tickSize: "0.25",
+          tickValue: "12.50",
+          commissions: "0",
         });
       }
     }
@@ -257,15 +269,45 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
                 name="positionSize"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Size (Shares/Contracts)</FormLabel>
+                    <FormLabel>Contracts</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder="100" className="font-numbers" {...field} />
+                      <Input type="number" step="any" placeholder="1" className="font-numbers" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="tickSize"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tick Size</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="0.25" className="font-numbers" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tickValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tick Value ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="12.50" className="font-numbers" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border/50 pt-4">
               <FormField
                 control={form.control}
                 name="riskAmount"
@@ -288,6 +330,20 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
                     <FormLabel>Target Reward ($)</FormLabel>
                     <FormControl>
                       <Input type="number" step="any" placeholder="1500" className="font-numbers" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="commissions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Commissions ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="any" placeholder="4.00" className="font-numbers" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
