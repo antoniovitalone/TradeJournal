@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, MoreHorizontal, ArrowUpRight, ArrowDownRight, Search } from "lucide-react";
+import { Plus, MoreHorizontal, ArrowUpRight, ArrowDownRight, Search, Image as ImageIcon, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
@@ -34,6 +34,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Trades() {
   const { data: trades, isLoading } = useTrades();
@@ -113,6 +119,7 @@ export default function Trades() {
                 <TableHead className="text-right">Gross P&L</TableHead>
                 <TableHead className="text-right">Fees</TableHead>
                 <TableHead className="text-right font-bold">Net P&L</TableHead>
+                <TableHead className="text-center">Chart</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -168,6 +175,29 @@ export default function Trades() {
                       </TableCell>
                       <TableCell className={`text-right font-numbers font-bold ${isWin ? 'text-success text-glow-success' : isLoss ? 'text-destructive text-glow-danger' : 'text-muted-foreground'}`}>
                         {formatCurrency(netPnl)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {trade.screenshotUrl ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <a 
+                                  href={trade.screenshotUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-primary"
+                                >
+                                  <ImageIcon className="w-4 h-4" />
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent className="p-0 border-border/50 overflow-hidden shadow-2xl max-w-xs">
+                                <img src={trade.screenshotUrl} alt="Chart Preview" className="w-full h-auto" />
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <span className="text-muted-foreground/30">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>

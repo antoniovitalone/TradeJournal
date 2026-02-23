@@ -19,6 +19,7 @@ export const trades = pgTable("trades", {
   tickSize: numeric("tick_size").notNull().default('0.25'),
   tickValue: numeric("tick_value").notNull().default('12.50'),
   commissions: numeric("commissions").default('0'),
+  screenshotUrl: text("screenshot_url"),
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({ 

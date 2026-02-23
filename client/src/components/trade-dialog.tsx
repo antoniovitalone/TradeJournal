@@ -28,6 +28,7 @@ const formSchema = z.object({
   tickSize: z.coerce.string().default("0.25"),
   tickValue: z.coerce.string().default("12.50"),
   commissions: z.coerce.string().default("0"),
+  screenshotUrl: z.string().optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -85,6 +86,7 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
           tickSize: trade.tickSize?.toString() || "0.25",
           tickValue: trade.tickValue?.toString() || "12.50",
           commissions: trade.commissions?.toString() || "0",
+          screenshotUrl: trade.screenshotUrl || "",
         });
       } else {
         form.reset({
@@ -103,6 +105,7 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
           tickSize: "0.25",
           tickValue: "12.50",
           commissions: "0",
+          screenshotUrl: "",
         });
       }
     }
@@ -369,6 +372,30 @@ export function TradeDialog({ trade, open, onOpenChange }: TradeDialogProps) {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="screenshotUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Screenshot URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Paste image URL (e.g. from TradingView or Lightshot)" 
+                      className="bg-background/50 border-border/50"
+                      {...field} 
+                      value={field.value || ""} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  {field.value && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border/50">
+                      <img src={field.value} alt="Trade Screenshot Preview" className="w-full h-auto max-h-48 object-cover" />
+                    </div>
+                  )}
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
