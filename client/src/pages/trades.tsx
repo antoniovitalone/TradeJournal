@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTrades, useDeleteTrade } from "@/hooks/use-trades";
 import { TradeDialog } from "@/components/trade-dialog";
+import { TradeReviewDialog } from "../components/trade-review-dialog";
 import { type Trade } from "@shared/schema";
 import { formatCurrency, formatNumber, formatShortDate } from "@/lib/format";
 import { 
@@ -47,7 +48,8 @@ export default function Trades() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [tradeToDelete, setTradeToDelete] = useState<number | null>(null);
   
@@ -209,6 +211,15 @@ export default function Trades() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-card border-border/50 shadow-xl">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+  onClick={() => {
+    setSelectedTrade(trade);
+    setIsReviewOpen(true);
+  }}
+  className="cursor-pointer"
+>
+  View Trade
+</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(trade)} className="cursor-pointer">
                               Edit Trade
                             </DropdownMenuItem>
@@ -231,11 +242,17 @@ export default function Trades() {
         </div>
       </div>
 
-      <TradeDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-        trade={selectedTrade} 
-      />
+     <TradeDialog
+  open={isDialogOpen}
+  onOpenChange={setIsDialogOpen}
+  trade={selectedTrade}
+/>
+
+<TradeReviewDialog
+  trade={selectedTrade}
+  open={isReviewOpen}
+  onOpenChange={setIsReviewOpen}
+/>
 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent className="glass-panel border-border/50">
