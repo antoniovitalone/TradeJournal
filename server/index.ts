@@ -5,7 +5,13 @@ import { createServer } from "http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import session from "express-session";
+import "express-session";
 
+declare module "express-session" {
+  interface SessionData {
+    userId: number;
+  }
+}
 const app = express();
 const httpServer = createServer(app);
 

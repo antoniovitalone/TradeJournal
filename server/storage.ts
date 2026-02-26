@@ -6,24 +6,33 @@ import {
   type UpdateTradeRequest,
   type AnalyticsResponse
 } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
-  getTrades(): Promise<Trade[]>;
-  getTrade(id: number): Promise<Trade | undefined>;
+  getTrades(userId: number): Promise<Trade[]>;
+  getTrade(id: number, userId: number): Promise<Trade | undefined>;
   createTrade(trade: InsertTrade): Promise<Trade>;
-  updateTrade(id: number, updates: UpdateTradeRequest): Promise<Trade>;
-  deleteTrade(id: number): Promise<void>;
-  getAnalytics(): Promise<AnalyticsResponse>;
+  updateTrade(id: number, updates: UpdateTradeRequest, userId: number): Promise<Trade>;
+  deleteTrade(id: number, userId: number): Promise<void>;
+  getAnalytics(userId: number): Promise<AnalyticsResponse>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getTrades(): Promise<Trade[]> {
-    return await db.select().from(trades).orderBy(desc(trades.entryDate));
+
+  async getTrades(userId: number): Promise<Trade[]> {
+    return await db
+      .select()
+      .from(trades)
+      .where(eq(trades.userId, userId))
+      .orderBy(desc(trades.entryDate));
   }
 
-  async getTrade(id: number): Promise<Trade | undefined> {
-    const [trade] = await db.select().from(trades).where(eq(trades.id, id));
+  async getTrade(id: number, userId: number): Promise<Trade | undefined> {
+    const [trade] = await db
+      .select()
+      .from(trades)
+      .where(and(eq(trades.id, id), eq(trades.userId, userId)));
+
     return trade;
   }
 
@@ -32,32 +41,36 @@ export class DatabaseStorage implements IStorage {
     return newTrade;
   }
 
-  async updateTrade(id: number, updates: UpdateTradeRequest): Promise<Trade> {
-    const [updated] = await db.update(trades)
+  async updateTrade(id: number, updates: UpdateTradeRequest, userId: number): Promise<Trade> {
+    const [updated] = await db
+      .update(trades)
       .set(updates)
-      .where(eq(trades.id, id))
+      .where(and(eq(trades.id, id), eq(trades.userId, userId)))
       .returning();
+
     return updated;
   }
 
-  async deleteTrade(id: number): Promise<void> {
-    await db.delete(trades).where(eq(trades.id, id));
+  async deleteTrade(id: number, userId: number): Promise<void> {
+    await db
+      .delete(trades)
+      .where(and(eq(trades.id, id), eq(trades.userId, userId)));
   }
 
-  async getAnalytics(): Promise<AnalyticsResponse> {
-    const allTrades = await this.getTrades();
-    const closedTrades = allTrades.filter(t => t.status === 'closed');
-    
+  async getAnalytics(userId: number): Promise<AnalyticsResponse> {
+    const allTrades = await this.getTrades(userId);
+    const closedTrades = allTrades.filter(t => t.status === "closed");
+
     const totalTrades = closedTrades.length;
     let wins = 0;
     let losses = 0;
     let totalPnl = 0;
     let riskRewardSum = 0;
     let riskRewardCount = 0;
-    
-    // Sort ascending for performance curve
-    const sortedClosedTrades = [...closedTrades].sort((a, b) => 
-      new Date(a.exitDate || a.entryDate).getTime() - new Date(b.exitDate || b.entryDate).getTime()
+
+    const sortedClosedTrades = [...closedTrades].sort((a, b) =>
+      new Date(a.exitDate || a.entryDate).getTime() -
+      new Date(b.exitDate || b.entryDate).getTime()
     );
 
     const performanceCurve: { date: string; cumulativePnl: number }[] = [];
@@ -70,10 +83,10 @@ export class DatabaseStorage implements IStorage {
 
       if (netPnl > 0) wins++;
       else if (netPnl < 0) losses++;
-      
+
       totalPnl += netPnl;
-      
       currentCumulative += netPnl;
+
       performanceCurve.push({
         date: (t.exitDate || t.entryDate).toISOString(),
         cumulativePnl: currentCumulative
@@ -81,6 +94,7 @@ export class DatabaseStorage implements IStorage {
 
       const risk = Number(t.riskAmount || 0);
       const reward = Number(t.rewardAmount || Math.abs(netPnl));
+
       if (risk > 0 && netPnl > 0) {
         riskRewardSum += reward / risk;
         riskRewardCount++;
@@ -88,7 +102,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
-    const averageRiskReward = riskRewardCount > 0 ? riskRewardSum / riskRewardCount : 0;
+    const averageRiskReward =
+      riskRewardCount > 0 ? riskRewardSum / riskRewardCount : 0;
 
     return {
       totalTrades,

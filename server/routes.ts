@@ -10,7 +10,7 @@ export async function registerRoutes(
 ): Promise<Server> {
 
   /* =========================
-     GET ALL TRADES (USER)
+     GET ALL TRADES
   ========================= */
   app.get(api.trades.list.path, async (req, res) => {
     if (!req.session?.userId) {
