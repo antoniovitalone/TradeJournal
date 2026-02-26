@@ -92,6 +92,19 @@ const port = 5173;
 app.get("/", (req, res) => {
   res.send("Backend is working 🚀");
 });
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "./public")));
+
+  app.get("*", (_, res) => {
+    res.sendFile(path.join(__dirname, "./public/index.html"));
+  });
+}
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
