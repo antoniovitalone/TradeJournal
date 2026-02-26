@@ -1,29 +1,67 @@
-import { pgTable, text, serial, numeric, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  timestamp,
+  numeric
+} from "drizzle-orm/pg-core";
+
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+/* =======================
+   USERS TABLE
+======================= */
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+/* =======================
+   TRADES TABLE
+======================= */
+
 export const trades = pgTable("trades", {
   id: serial("id").primaryKey(),
+
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+
   ticker: text("ticker").notNull(),
   entryDate: timestamp("entry_date").notNull().defaultNow(),
   exitDate: timestamp("exit_date"),
+
   entryPrice: numeric("entry_price").notNull(),
   exitPrice: numeric("exit_price"),
-  positionSize: numeric("position_size").notNull(), // Number of contracts
-  direction: text("direction").notNull(), // 'long' or 'short'
+
+  positionSize: numeric("position_size").notNull(),
+  direction: text("direction").notNull(),
+
   pnl: numeric("pnl"),
   notes: text("notes"),
+
   riskAmount: numeric("risk_amount"),
   rewardAmount: numeric("reward_amount"),
-  status: text("status").notNull().default('open'), // 'open' or 'closed'
-  tickSize: numeric("tick_size").notNull().default('0.25'),
-  tickValue: numeric("tick_value").notNull().default('12.50'),
-  commissions: numeric("commissions").default('0'),
+
+  status: text("status").notNull().default("open"),
+
+  tickSize: numeric("tick_size").notNull().default("0.25"),
+  tickValue: numeric("tick_value").notNull().default("12.50"),
+  commissions: numeric("commissions").default("0"),
+
   screenshotUrl: text("screenshot_url"),
 });
 
-export const insertTradeSchema = createInsertSchema(trades).omit({ 
-  id: true 
+/* =======================
+   INSERT SCHEMA
+======================= */
+
+export const insertTradeSchema = createInsertSchema(trades).omit({
+  id: true,
 });
 
 export type Trade = typeof trades.$inferSelect;
@@ -34,6 +72,10 @@ export type UpdateTradeRequest = Partial<InsertTrade>;
 
 export type TradeResponse = Trade;
 export type TradesListResponse = Trade[];
+
+/* =======================
+   ANALYTICS RESPONSE
+======================= */
 
 export interface AnalyticsResponse {
   totalTrades: number;

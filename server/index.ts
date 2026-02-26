@@ -4,10 +4,24 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import session from "express-session";
 
 const app = express();
 const httpServer = createServer(app);
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+    },
+  })
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
