@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 const httpServer = createServer(app);
@@ -89,11 +91,6 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
 const port = 5173;
-app.get("/", (req, res) => {
-  res.send("Backend is working 🚀");
-});
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,6 +103,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
+
 })();
